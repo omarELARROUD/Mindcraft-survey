@@ -3,12 +3,14 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import { promises as fs } from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { body, validationResult } from 'express-validator';
 
-// Correct __dirname calculation for ES Modules (ESM)
-const __dirname = path.dirname(new URL(import.meta.url).pathname); // Calculate correctly without additional steps
-
 dotenv.config();
+
+// ES Modules replacement for __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -38,11 +40,9 @@ app.post('/api/v1/survey', validateSurvey, async (req, res) => {
 
   const surveyData = { ...req.body, submittedAt: new Date() };
   
-  // Fix the path issue by resolving the absolute directory path
-  const dir = path.resolve(__dirname, 'surveys');  // Normalize path using resolve
+  const dir = path.join(__dirname, 'surveys');
 
   try {
-    // Create directory if it doesn't exist
     await fs.mkdir(dir, { recursive: true });
 
     const fileName = `survey_${Date.now()}.json`;

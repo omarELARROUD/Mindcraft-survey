@@ -126,6 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (response.ok) {
           const result = await response.json();
           alert('Form submitted successfully!');
+          form.reset();
           console.log(result); // Handle the server response (e.g., show confirmation, handle data)
         } else {
           const errorResult = await response.json();
