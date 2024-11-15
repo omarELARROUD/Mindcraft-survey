@@ -1,0 +1,34 @@
+# Node.js dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+
+# Directory for surveys data (or any other generated data)
+surveys/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# IDE/editor specific files
+.vscode/
+.idea/
+
+# Optional: If you are using build directories
+dist/
+build/
+
+# Optional: If you use temporary files
+tmp/
+temp/
+
+# Optional: If you're using TypeScript
+*.tsbuildinfo
