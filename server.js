@@ -1,0 +1,70 @@
+require('dotenv').config();
+
+const express = require('express');
+const bodyParser = require('body-parser');
+const fs = require('fs').promises;
+const path = require('path');
+const { body, validationResult } = require('express-validator');
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static('public'));
+
+// Validation middleware
+const validateSurvey = [
+  body('name').trim().isLength({ min: 2, max: 50 })
+    .withMessage('Name must be between 2 and 50 characters'),
+  body('email').trim().isEmail()
+    .withMessage('Please enter a valid email'),
+  body('age').optional().isInt({ min: 0, max: 120 })
+    .withMessage('Age must be between 0 and 120'),
+  body('childAgeGroup').isIn(['5-7', '8-10', '11-13', '14+'])
+    .withMessage('Please select a valid age group'),
+  body('recommend').isIn(['Definitely', 'Maybe', 'Not Sure'])
+    .withMessage('Please select a valid recommendation'),
+  body('favoriteFeature').isIn(['Hands-on activities', 'Creative challenges', 'Team projects', 'Educational fun'])
+    .withMessage('Please select a valid favorite feature'),
+  body('improvements.*').isIn(['More hands-on activities', 'Longer workshops', 'More creative challenges', 'Other'])
+    .withMessage('Please select valid improvements')
+];
+
+// Save survey data to a JSON file
+app.post('/api/v1/survey', validateSurvey, async (req, res) => {
+  try {
+    // Validation
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const surveyData = {
+      ...req.body,
+      submittedAt: new Date()
+    };
+
+    // Create "surveys" directory if it doesn't exist
+    const dir = path.join(__dirname, 'surveys');
+    await fs.mkdir(dir, { recursive: true });
+
+    // Save survey data as a JSON file
+    const fileName = `survey_${Date.now()}.json`;
+    await fs.writeFile(
+      path.join(dir, fileName),
+      JSON.stringify(surveyData, null, 2)
+    );
+
+    res.status(201).json({ message: 'Survey saved successfully', fileName });
+  } catch (error) {
+    console.error('Error saving survey:', error);
+    res.status(500).json({ error: 'Failed to save survey' });
+  }
+});
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
