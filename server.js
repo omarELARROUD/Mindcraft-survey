@@ -8,12 +8,8 @@ import { body, validationResult } from 'express-validator';
 
 dotenv.config();
 
-// ES Modules replacement for __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3002;
 
 // Middleware
 app.use(bodyParser.json());
@@ -24,7 +20,7 @@ app.use(express.static('public'));
 const validateSurvey = [
   body('name').trim().isLength({ min: 2, max: 50 }).withMessage('Name must be between 2 and 50 characters'),
   body('email').trim().isEmail().withMessage('Please enter a valid email'),
-  body('age').optional().isInt({ min: 0, max: 120 }).withMessage('Age must be between 0 and 120'),
+  body('age').optional().isInt({ min: 0, max: 120 }).withMessage('Age must be between 0 and 120').optional(),
   body('favoriteFeature').isIn(['Hands-on activities', 'Creative challenges', 'Team projects', 'Educational fun'])
     .withMessage('Please select a valid favorite feature'),
   body('improvements.*').isIn(['More hands-on activities', 'Longer workshops', 'More creative challenges', 'Other'])
@@ -35,12 +31,13 @@ const validateSurvey = [
 app.post('/api/v1/survey', validateSurvey, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log(errors);
     return res.status(400).json({ errors: errors.array() });
   }
 
   const surveyData = { ...req.body, submittedAt: new Date() };
   
-  const dir = path.join(__dirname, 'surveys');
+  const dir = path.join(process.cwd(), 'surveys');
 
   try {
     await fs.mkdir(dir, { recursive: true });
