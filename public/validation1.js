@@ -1,209 +1,201 @@
 document.addEventListener("DOMContentLoaded", function () {
   const form = document.getElementById("surveyForm");
+  const formState = {
+    name: false,
+    email: false,
+    role: false,
+    recommend: false,
+    favorite: false,
+    improvements: false,
+    age: false
+  };
 
-  form.addEventListener("submit", async function (event) {
-    event.preventDefault(); // Prevent form submission for validation
-    let isValid = true; // Track overall form validity
+  // Validation patterns
+  const patterns = {
+    name: /^[A-Za-z\s]{2,50}$/,
+    email: /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+    age: /^(?:[0-9]|[1-9][0-9]|1[0-1][0-9]|120)$/
+  };
 
-    // Helper Function: Reset Error State
-    function resetError(input, errorSpan) {
-      input.addEventListener("input", function () {
-        input.style.border = "";
-        input.style.backgroundColor = "";
-        errorSpan.textContent = "";
-      });
-    }
-    function resetErrorInput(inputGroup, errorSpan) {
-      // Add a change event listener to all inputs in the group
-      inputGroup.forEach((input) => {
-        input.addEventListener("change", function () {
-          // If at least one checkbox is checked, clear the error
-          const isChecked = Array.from(inputGroup).some(
-            (checkbox) => checkbox.checked
-          );
-          if (isChecked) {
-            inputGroup.forEach((checkbox) => (checkbox.style.outline = ""));
-            errorSpan.textContent = "";
-          }
-        });
-      });
-    }
-
-    // Validate Name
-    const name = document.getElementById("name");
-    const nameError = document.getElementById("msg-error");
-    if (!name.value.trim()) {
-      name.style.border = "1px solid red";
-      name.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
-      nameError.textContent = "Name is required.";
-      nameError.style.color = "red";
-      isValid = false;
-      // } else if (name.value.length < 2 || name.value.length > 50) {
-      //   name.style.border = '1px solid red';
-      //   name.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
-      //   nameError.textContent = 'Name must be between 2 and 50 characters.';
-      //   nameError.style.color = 'red';
-      //   isValid = false;
-    } else {
-      name.style.border = "";
-      nameError.textContent = "";
-    }
-    resetError(name, nameError);
-
-    // Validate Email
-    const email = document.getElementById("email");
-    const emailError = email.nextElementSibling;
-    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple email validation regex
-    if (!email.value.trim()) {
-      email.style.border = "1px solid red";
-      email.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
-      emailError.textContent = "Email is required.";
-      emailError.style.color = "red";
-      isValid = false;
-      // } else if (!emailRegex.test(email.value)) {
-      //   email.style.border = '1px solid red';
-      //   email.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
-      //   emailError.textContent = 'Please enter a valid email address.';
-      //   emailError.style.color = 'red';
-      //   isValid = false;
-    } else {
-      email.style.border = "";
-      emailError.textContent = "";
-    }
-    resetError(email, emailError);
-
-    // Validate Age (Optional)
-    const age = document.getElementById('age');
-    // const ageError = age.nextElementSibling;
-    // if (age.value && (age.value < 0 || age.value > 120)) {
-    //   age.style.border = '1px solid red';
-    //   age.style.backgroundColor = 'rgba(255, 0, 0, 0.2)';
-    //   ageError.textContent = 'Age must be between 0 and 120.';
-    //   ageError.style.color = 'red';
-    //   isValid = false;
-    // } else {
-    //   age.style.border = '';
-    //   ageError.textContent = '';
-    // }
-    // resetError(age, ageError);
-
-    // Validate Child's Age Group (Role)
-    const role = document.getElementById("role");
-    const roleError = role.nextElementSibling;
-    if (!role.value) {
-      role.style.border = "1px solid red";
-      role.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
-      roleError.textContent = "Please select a child's age group.";
-      roleError.style.color = "red";
-      isValid = false;
-    } else {
-      role.style.border = "";
-      roleError.textContent = "";
-    }
-    resetError(role, roleError);
-
-    // Validate Recommandation
-    let selected = false;
-    const recommandations = document.getElementsByName("recommend");
-    const radioError =
-      document.querySelector(".radio-group").nextElementSibling;
-    console.log(radioError);
-    for (const radio of recommandations) {
-      if (radio.checked) {
-        selected = true;
-        break;
-      }
-    }
-    // Set error if no radio is selected
-    if (!selected) {
-      isValid = false;
-      for (const radio of recommandations) {
-        radio.style.outline = "1px solid red";
-      }
-      radioError.textContent = "Please select a answare from above.";
-      radioError.style.color = "red";
-    } else {
-      radioError.textContent = "";
-      for (const radio of recommandations) {
-        radio.style.outline = "none";
-      }
-    }
-    resetErrorInput(recommandations, radioError);
-
-    // Validate Favorite Feature
-    const favorite = document.getElementById("favorite");
-    const favoriteError = favorite.nextElementSibling;
-    if (!favorite.value) {
-      favorite.style.border = "1px solid red";
-      favorite.style.backgroundColor = "rgba(255, 0, 0, 0.2)";
-      favoriteError.textContent = "Please select a favorite feature.";
-      favoriteError.style.color = "red";
-      isValid = false;
-    } else {
-      favorite.style.border = "";
-      favoriteError.textContent = "";
-    }
-    resetError(favorite, favoriteError);
-
-    // Validate Improvements
-    const checkboxes = document.querySelectorAll(
-      'input[name="improvements"]:checked'
-    ); // Get checked checkboxes
-    const errorSpan =
-      document.querySelector(".checkbox-group").nextElementSibling;
-    const checkboxesGroup = document.querySelectorAll(
-      'input[name="improvements"]'
-    );
-    if (checkboxes.length === 0) {
-      errorSpan.textContent = "Please select at least one improvement option."; // Set error message
-      errorSpan.style.color = "red";
-
-      // Highlight checkboxes with an outline
-      checkboxesGroup.forEach((checkbox) => {
-        checkbox.style.outline = "2px solid red"; // Set a red outline for each unchecked checkbox
-      });
-      isValid = false;
-    } else {
-      errorSpan.textContent = ""; // Clear the error message
-      checkboxes.forEach((checkbox) => {
-        checkbox.style.outline = ""; // Remove the outline for each checked checkbox
-      });
-    }
-    resetErrorInput(checkboxesGroup, errorSpan);
-
-    // Final Submission Check
-    if (isValid) {
-      // Collect form data into an object
-      const formData = {
-        name: name.value,
-        email: email.value,
-        age: age.value.length?age.value:undefined,
-        role: role.value,
-        favoriteFeature: favorite.value,
+  // Debounce function for real-time validation
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
       };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
 
-      // Send POST request using fetch
+  // Generic validation function
+  function validateField(input, pattern, errorSpan, errorMessage) {
+    const value = input.value.trim();
+    const isValid = pattern ? pattern.test(value) : !!value;
+    
+    setFieldStatus(input, errorSpan, isValid, errorMessage);
+    return isValid;
+  }
+
+  // Set field status (valid/invalid)
+  function setFieldStatus(input, errorSpan, isValid, errorMessage) {
+    if (!isValid) {
+      input.style.border = "2px solid red";
+      input.style.backgroundColor = "rgba(255, 0, 0, 0.1)";
+      errorSpan.textContent = errorMessage;
+      errorSpan.style.color = "red";
+    } else {
+      input.style.border = "2px solid #4CAF50";
+      input.style.backgroundColor = "rgba(76, 175, 80, 0.1)";
+      errorSpan.textContent = "";
+    }
+  }
+
+  // Reset field status on input
+  function resetFieldStatus(input, errorSpan) {
+    input.style.border = "";
+    input.style.backgroundColor = "";
+    errorSpan.textContent = "";
+  }
+
+  // Validate group inputs (radio/checkbox)
+  function validateGroup(inputs, errorSpan, errorMessage) {
+    const isValid = Array.from(inputs).some(input => input.checked);
+    
+    inputs.forEach(input => {
+      input.style.outline = isValid ? "" : "2px solid red";
+    });
+    
+    errorSpan.textContent = isValid ? "" : errorMessage;
+    errorSpan.style.color = "red";
+    
+    return isValid;
+  }
+
+  // Add real-time validation listeners
+  const addValidationListener = (input, pattern, errorSpan, errorMessage, stateKey) => {
+    const validateWithDebounce = debounce(() => {
+      formState[stateKey] = validateField(input, pattern, errorSpan, errorMessage);
+    }, 300);
+
+    input.addEventListener("input", validateWithDebounce);
+    input.addEventListener("blur", () => {
+      formState[stateKey] = validateField(input, pattern, errorSpan, errorMessage);
+    });
+  };
+
+  // Setup field validations
+  const name = document.getElementById("name");
+  const nameError = document.getElementById("msg-error");
+  addValidationListener(name, patterns.name, nameError, "Name must be 2-50 characters, letters only", "name");
+
+  const email = document.getElementById("email");
+  const emailError = email.nextElementSibling;
+  addValidationListener(email, patterns.email, emailError, "Please enter a valid email address", "email");
+
+  const age = document.getElementById('age');
+  const ageError = age.nextElementSibling;
+  addValidationListener(age, patterns.age, ageError, "Age must be between 0 and 120", "age");
+
+  const role = document.getElementById("role");
+  const roleError = role.nextElementSibling;
+  role.addEventListener("change", () => {
+    formState.role = validateField(role, null, roleError, "Please select a child's age group");
+  });
+
+  // Setup group validations
+  const recommandations = document.getElementsByName("recommend");
+  const radioError = document.querySelector(".radio-group").nextElementSibling;
+  recommandations.forEach(radio => {
+    radio.addEventListener("change", () => {
+      formState.recommend = validateGroup(recommandations, radioError, "Please select an answer");
+    });
+  });
+
+  const favorite = document.getElementById("favorite");
+  const favoriteError = favorite.nextElementSibling;
+  favorite.addEventListener("change", () => {
+    formState.favorite = validateField(favorite, null, favoriteError, "Please select a favorite feature");
+  });
+
+  const improvements = document.querySelectorAll('input[name="improvements"]');
+  const improvementsError = document.querySelector(".checkbox-group").nextElementSibling;
+  improvements.forEach(checkbox => {
+    checkbox.addEventListener("change", () => {
+      formState.improvements = validateGroup(improvements, improvementsError, "Please select at least one improvement option");
+    });
+  });
+
+  // Form submission handler
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    // Validate all fields
+    formState.name = validateField(name, patterns.name, nameError, "Name must be 2-50 characters, letters only");
+    formState.email = validateField(email, patterns.email, emailError, "Please enter a valid email address");
+    formState.role = validateField(role, null, roleError, "Please select a child's age group");
+    formState.recommend = validateGroup(recommandations, radioError, "Please select an answer");
+    formState.favorite = validateField(favorite, null, favoriteError, "Please select a favorite feature");
+    formState.improvements = validateGroup(improvements, improvementsError, "Please select at least one improvement option");
+
+    // Check if age is provided and valid
+    if (age.value && !patterns.age.test(age.value)) {
+      formState.age = false;
+      setFieldStatus(age, ageError, false, "Age must be between 0 and 120");
+    }
+
+    // Check if form is valid
+    const isValid = Object.values(formState).every(state => state === true);
+
+    if (isValid) {
       try {
+        const formData = {
+          name: name.value.trim(),
+          email: email.value.trim(),
+          age: age.value.trim() || undefined,
+          role: role.value,
+          recommend: Array.from(recommandations).find(r => r.checked)?.value,
+          favoriteFeature: favorite.value,
+          improvements: Array.from(improvements)
+            .filter(imp => imp.checked)
+            .map(imp => imp.value)
+        };
+
         const response = await fetch("/api/v1/survey", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json"
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify(formData)
         });
 
-        if (response.ok) {
-          const result = await response.json();
-          alert("Form submitted successfully!");
-          form.reset();
-          console.log(result); // Handle the server response (e.g., show confirmation, handle data)
-        } else {
-          const errorResult = await response.json();
-          alert("Failed to submit the form: " + errorResult.message);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+
+        const result = await response.json();
+        alert("Form submitted successfully!");
+        form.reset();
+        
+        // Reset all validation states
+        Object.keys(formState).forEach(key => formState[key] = false);
+        
+        // Reset all field styles
+        [name, email, age, role, favorite].forEach(input => {
+          resetFieldStatus(input, input.nextElementSibling || document.getElementById("msg-error"));
+        });
+        
       } catch (error) {
-        console.error("Error submitting the form:", error);
-        alert("There was an error submitting the form.");
+        console.error("Submission error:", error);
+        alert("An error occurred while submitting the form. Please try again.");
+      }
+    } else {
+      // Scroll to the first error
+      const firstError = document.querySelector('.error-message:not(:empty)');
+      if (firstError) {
+        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }
   });
